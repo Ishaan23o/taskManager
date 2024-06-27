@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Form, Link, useNavigate } from 'react-router-dom'
 import axios from "axios";
 
-const URL = "https://localhost:5000/";
+const URL = "http://localhost:5000/";
 export default function Login(props) {
     const navigate = useNavigate();
     const currUser = localStorage.getItem('token');
@@ -10,27 +10,30 @@ export default function Login(props) {
     useEffect(() => {
         async function fetchData() {
             try {
-                let response = await axios.post(URL + 'validate',{token:currUser});
-                response = response.data;
-                if(response.valid === true){
-                    navigate('/homepage');
+                if (currUser) {
+                    let response = await axios.post(URL + 'validate', { token: currUser });
+                    response = response.data;
+                    if (response.valid === true) {
+                        navigate('/homepage');
+                    }
                 }
             }
             catch (err) {
-                navigate('/homepage');
+                alert(err);
             }
-            finally{
+            finally {
                 changeValidated(true);
             }
         }
         fetchData();
     },
-        [navigate,currUser]);
+        [navigate, currUser]);
 
     const handleSubmit = event => {
         event.preventDefault();
-        axios.post(props.action, formdata).then((data) => {
-            delete data.data.user.password;
+        axios.post(URL + 'login', formdata).then((data) => {
+            console.log(data.data);
+            localStorage.setItem('token', data.data['token']);
             navigate('/homepage');
         }).catch((err) => {
             alert(err.message);
@@ -45,7 +48,7 @@ export default function Login(props) {
         });
         setFormData(newData);
     }
-    if(!validated)return (
+    if (!validated) return (
         <></>
     );
     return (
@@ -70,7 +73,6 @@ export default function Login(props) {
                                 <button className="btn btn-primary btn-lg btn-block" type="submit">Login</button>
                             </Form>
                             <hr className="my-4" />
-                            <Link to='/fgtpwd'><h6>Forgot Password?</h6></Link>
                         </div>
                     </div>
                 </div>

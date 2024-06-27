@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useHistory, useNavigate, useParams } from 'react-router-dom';
+import {useNavigate, useParams } from 'react-router-dom';
 import './../../css/Home.module.css'
 
 const AddTask = () => {
@@ -10,7 +10,7 @@ const AddTask = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (id) {
-      axios.get(`http://localhost:5000/tasks/${id}`)
+      axios.post(`http://localhost:5000/taskget`,{token:localStorage.getItem('token'),id:id})
         .then(response => {
           setTitle(response.data.title);
           setDescription(response.data.description);
@@ -21,13 +21,13 @@ const AddTask = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const task = { title, description };
+    const task = { title, description,token:localStorage.getItem('token')};
     if (id) {
-      axios.put(`http://localhost:5000/tasks/${id}`, task)
-        .then(() => navigate('./'))
+      axios.post(`http://localhost:5000/taskupdate`, task)
+        .then((data) => navigate(`/tasks/${data.data['id']}`))
         .catch(error => console.error(error));
     } else {
-      axios.post('http://localhost:5000/tasks', task)
+      axios.post('http://localhost:5000/taskadd', task)
         .then(() => navigate('../'))
         .catch(error => console.error(error));
     }

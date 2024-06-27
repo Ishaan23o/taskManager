@@ -1,25 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom';
+import {useNavigate, useParams } from 'react-router-dom';
+import '../../css/Home.module.css'
 
 const TaskDetails = () => {
+    const navigate = useNavigate();
   const [task, setTask] = useState(null);
-  const { id } = useParams();
-
+  const {id} = useParams();
   useEffect(() => {
-    axios.get(`http://localhost:5000/tasks/${id}`)
+    axios.post(`http://localhost:5000/taskget`,{token:localStorage.getItem('token'),id:id})
       .then(response => setTask(response.data))
-      .catch(error => console.error(error));
-  }, [id]);
+      .catch(error => {
+        console.error(error);
+        navigate('/homepage');
+  })
+  }, [navigate,id]);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const temp = { title:task.title, description:task.description,token:localStorage.getItem('token'),id:id };
+      axios.post(`http://localhost:5000/taskupdate/`, temp)
+        .then(() => navigate('./'))
+        .catch(error => console.error(error));
+  };
 
-  if (!task) return <div>Loading...</div>;
+  
+
+  if (!task){
+    return (<h6>Loading...</h6>);
+  }
 
   return (
-    <div>
-      <h1>{task.title}</h1>
-      <p>{task.description}</p>
-      <Link to={`/edit/${task.id}`}>Edit</Link>
-      <Link to="/">Back to Task List</Link>
+    <div className="container mt-5">
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-label">Title</label>
+          <input type="text" className="form-control" value={task.title} onChange={(e) => setTask({...task,title:e.target.value})} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Description</label>
+          <textarea className="form-control" value={task.description} onChange={(e) => setTask({...task,description:e.target.value})} required></textarea>
+        </div>
+        <button type="submit" className="btn btn-primary">Submit</button>
+      </form>
+      </div>
     </div>
   );
 };

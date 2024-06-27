@@ -5,7 +5,7 @@ import './../css/Home.module.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState([{id:"dfbdsf",title:"dgfsh"},{id:"sgfdg",title:"dhfbadf"}]);
+  const [tasks, setTasks] = useState([]);
 
   const logoutUser = () => {
     localStorage.removeItem('token');
@@ -13,14 +13,14 @@ const Home = () => {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:5000/tasks')
+    axios.post('http://localhost:5000/tasks',{token:localStorage.getItem('token')})
       .then(response => setTasks(response.data))
       .catch(error => console.error(error));
   }, []);
 
-  const deleteTask = (id) => {
-    axios.delete(`http://localhost:5000/tasks/${id}`)
-      .then(() => setTasks(tasks.filter(task => task.id !== id)))
+  const deleteTask = (ids) => {
+    axios.post(`http://localhost:5000/taskdel/`,{token:localStorage.getItem('token'),id:ids})
+      .then(() => setTasks(tasks.filter(task => task.id !== ids)))
       .catch(error => console.error(error));
   };
 
@@ -33,9 +33,9 @@ const Home = () => {
       <Link to="/addTask" className="btn btn-primary mb-4">Add Task</Link>
       <ul className="list-group">
         {tasks.map(task => (
-          <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
-            <Link to={`/tasks/${task.id}`} className="text-decoration-none">{task.title}</Link>
-            <button className="btn btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
+          <li key={task._id} className="list-group-item d-flex justify-content-between align-items-center">
+            <Link to={`/tasks/${task._id}`} className="text-decoration-none">{task.title}</Link>
+            <button className="btn btn-danger" onClick={() => deleteTask(task._id)}>Delete</button>
           </li>
         ))}
       </ul>
